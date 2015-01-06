@@ -6,12 +6,12 @@ In controller
 ```php
     public function actionIndex()
     {
-        $query = Article::find()->with('author')->published()->orderBy(['created_at'=>SORT_DESC]);
+        $query = Article::find()->all();
         $countQuery = clone $query;
         $pages = new \loveorigami\pagination\ReversePagination(
             [
                 'totalCount' => $countQuery->count(),
-                'pageSize' => Yii::$app->params['pageSize']
+                'pageSize' => 10, // or in config Yii::$app->params['pageSize']
             ]
         );
         $pages->pageSizeParam = false;
