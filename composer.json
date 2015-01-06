@@ -1,0 +1,35 @@
+{
+    "name": "loveorigami/yii2-reversed-pagination",
+    "description": "Yii2 reversed pagination",
+    "version": "1.0.0",
+    "type": "yii2-extension",
+    "keywords": [
+        "yii",
+        "yii2",
+        "slug",
+        "behavior"
+    ],
+    "homepage": "https://github.com/loveorigami/yii2-reversed-pagination",
+    "time": "2014-11-16",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Andrey Lukyanov",
+            "email": "loveorigami@mail.ru",
+            "homepage": "http://loveorigami.info",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/loveorigami/yii2-reversed-pagination/issues",
+        "source": "https://github.com/loveorigami/yii2-reversed-pagination"
+    },
+    "require": {
+        "yiisoft/yii2": "~2"
+    },
+    "autoload": {
+        "psr-4": {
+            "loveorigami\\rpagination\\": ""
+        }
+    }
+}
