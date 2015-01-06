@@ -1,5 +1,7 @@
-Yii2-reversed-pagination
+Yii2-reversed-pagination (dev mode)
 ========================
+!!! Do not use in your projects !!!
+
 Use for reversed pagination for Yii2.
 
 In controller
