@@ -19,7 +19,7 @@ class ReverseLinkPager extends LinkPager
     protected function renderPageButtons()
     {
         if (($pageCount = $this->pagination->getPageCount()) <= 1)
-            return array();
+            return '';
 
         list($beginPage, $endPage) = $this->getPageRange();
 
