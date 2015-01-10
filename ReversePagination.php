@@ -124,16 +124,6 @@ class ReversePagination extends \yii\data\Pagination
         if (isset($arr[$page]['dop_offset'])) {
             $this->dopOffset = $arr[$page]['dop_offset'];
         }
-
-        echo 'всего записей - ' . $this->totalCount . '<br />';
-        echo 'всего страниц - ' . $this->getPageCount() . '<br />'; // total pages
-        echo 'на незаполненной странице ' . $re['items'] . '<br />';
-        echo 'на сколько распределено ' . $re['pages'] . '<br />';
-        echo 'текущая страница - '. $page .'<br />';
-        echo 'доп. смещение - ' . $this->dopOffset . '<br />';
-        echo 'доп. лимит - ' . $this->dopLimit . '<br />';
-        echo 'limit - ' . $this->GetLimit() . '<br />';
-        echo 'доп. записей на 1 стр. ' . $re['on_page'] . '<br />';
     }
 
 
@@ -177,6 +167,5 @@ class ReversePagination extends \yii\data\Pagination
         $pageSize = $this->getPageSize() + $this->dopLimit;
         return $pageSize < 1 ? -1 : $pageSize;
     }
-
 
 } 
