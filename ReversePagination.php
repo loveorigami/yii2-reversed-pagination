@@ -1,16 +1,16 @@
 <?php
 /**
- * Created by PhpStorm.
  * User: loveorigami
  * Date: 07.11.2014
  * Time: 10:17
+ * Version 2.1
  */
 
 namespace loveorigami\pagination;
 
 
-class ReversePagination extends \yii\data\Pagination {
-
+class ReversePagination extends \yii\data\Pagination
+{
     /**
      * @var boolean
      * use for redistribution items on page and paginator
@@ -25,7 +25,7 @@ class ReversePagination extends \yii\data\Pagination {
      * work with redistribution = true
      * на скольких страницах распределять записи
      */
-    public $redistributionPageCount = 3;
+    public $rePageCount = 3;
 
     /**
      * @var int
@@ -33,130 +33,108 @@ class ReversePagination extends \yii\data\Pagination {
      * корректирующий коэффициент для показа-скрытия первой неполной страницы
      */
     public $hidePage = 0;
-    public $globalOffset = 0;
-    public $globalLimit = 0;
 
+    /**
+     * @var int
+     * correction factor for limit and offset
+     * корректирующий коэффициент для смещения и лимита
+     */
+    public $dopOffset = 0;
+    public $dopLimit = 0;
 
 
     public function init()
     {
-       if($this->redistribution && $this->totalCount) $this->getRedistribution();
+        if ($this->redistribution && $this->totalCount) $this->getRedistribution();
     }
 
     /**
      * @return all params for redistribution
      */
-    public function getRedistribution(){
+    public function getRedistribution()
+    {
         $totalCount = $this->totalCount;  // total items
         $pageSize = $this->getPageSize(); // items on page - limit
         $pageCount = $this->getPageCount(); // total pages
-        $page=$this->getPage();
+        $page = $this->getPage();
 
         // сколько на незаполненной странице
-        $re['items']=$totalCount-($pageCount*$pageSize)+$pageSize;
+        $re['items'] = $totalCount - ($pageCount * $pageSize) + $pageSize;
 
-        // На сколько страниц раскидывать остаток, если он есть
-        if($pageCount > $this->redistributionPageCount){
-            $re['pages'] = $this->redistributionPageCount;
-            // насколько заполнена страница
-            $part=intval($re['items']/$re['pages']);
-            $re['limit'] = intval($pageSize/$re['pages']*($re['pages']-1));
-        }
-        else {
-            $re['pages']=$pageCount-1;
-            $part=intval($re['items']/($re['pages']+1));
-            $re['limit'] = intval(($pageSize/($re['pages']+1))*$re['pages']);
-        }
-        // сколько записей приходится на каждую часть
-        $re['on_page'] = $part ? $part : 1;
-
-var_dump($re);
-// поправить скрипт для случая, когда страница 1, а остаточных записей больше 1
-// например всего 21, на странице 18. остатоок 3
-
-
-
-
-
-        // скрываем неполную страницу,
-        if($re['items'] < $re['limit']){
-            $this->hidePage=1; // скрываем в paginator-е незаполненную страницу
-            $this->globalOffset=$re['items'];
-        }
-        else{
-            $this->globalOffset=$re['items']-$pageSize;
+        // на скольких страницах распределять записи
+        if ($pageCount > $this->rePageCount) {
+            $re['pages'] = $this->rePageCount;
+            $on_page = intval($re['items'] / ($re['pages']));
+        } else {
+            $re['pages'] = $pageCount - 1;
+            $on_page = intval($re['items'] / ($re['pages']+1));
         }
 
+        // примерно, сколько доп. записей приходится на 1 страницу
+        $re['on_page'] = $on_page ? $on_page : 1;
+
+        // скрываем неполную страницу, последняя страница всегда полная
+        if ($re['items'] < $pageSize) {
+            $this->hidePage = 1; // скрываем в paginator-е незаполненную страницу
+            $this->dopOffset = $re['items'];
+        } else {
+            $this->dopOffset = $re['items'] - $pageSize;
+        }
 
         // пересчитываем и устанавливаем новые значения.
-        // Если значение $cur_page меньше единицы или отрицательно
-        // переходим на последнюю страницу
+        // Если значение $page меньше единицы или отрицательно
+        // переходим на первую страницу
         // А если слишком большое, то переходим на последнюю
 
-        $startArr=$pageCount-$this->hidePage-1; // уточняем для расчетов в массиве
-        if ($this->getPage() == 0 && !isset($_GET[$this->pageParam])){
-            $page=$startArr;
+        $startArr = $pageCount - $this->hidePage - 1; // уточняем для расчетов в массиве
+        if ($this->getPage() == 0 && !isset($_GET[$this->pageParam])) {
+            $page = $startArr;
         }
 
-        $arr=[]; // данные для итогового смещения
+        $arr = []; // данные для итогового смещения
         // количество записей меньше, чем часть лимита
-        if($re['items'] < $re['limit']){
-            $c=0;
-            $dop_items=$re['on_page'];
-            $offset=0;
+        if ($re['items'] < $pageSize) {
+            $c = 0;
+            $dop_limit = $re['on_page'];
+            $dop_offset = 0;
 
-            for($i=0; $i<=$re['pages']-1; $i++){
-                $c=$c+$re['on_page'];
+            for ($i = 0; $i <= $re['pages'] - 1; $i++) {
+                $c = $c + $re['on_page'];
 
-                if($c > $re['items']){
-                    $dop_items=0;
+                if ($c > $re['items']) {
+                    $dop_limit = 0;
                 }
 
-                if($i==$re['pages']){
-                    $c=$re['items']-($re['on_page']*($i-1));
-                    $dop_items = $c > 0 ? $c : 0;
+                if ($i == $re['pages'] - 1) {
+                    $c = $re['items'] - ($re['on_page'] * $i);
+                    $dop_limit = $c > 0 ? $c : 0;
                 }
 
-                $arr[$startArr-$i]['total']=$totalCount;
-                $arr[$startArr-$i]['dop_items']=$dop_items;
-                $arr[$startArr-$i]['cur_page']=$page;
-                $arr[$startArr-$i]['offset']=$offset;
-                $offset=$offset+$arr[$startArr-$i]['dop_items'];
+                $arr[$startArr - $i]['dop_limit'] = $dop_limit;
+                $arr[$startArr - $i]['dop_offset'] = $dop_offset;
+
+                $dop_offset = $dop_offset + $arr[$startArr - $i]['dop_limit']; // счетчик смещения с распределением
             }
-            var_dump($arr);
-
-            $cur_page['title']='C растановкой';
-            $cur_page['pages']=$pageCount-1;
-            $cur_page['page']=$page;
-            $cur_page['limit']=$pageSize+$arr[$page]['dop_items'];
-            $cur_page['offset']=$offset; // начало выборки;
-            $cur_page['start']=$totalCount-($pageSize*($page))-$offset; // начало выборки
         }
 
-
-        if(isset($arr[$page]['dop_items'])) {
-            $this->globalLimit=$arr[$page]['dop_items'];
-           // echo $this->globalLimit;
-            // $this->globalLimit=$re['items']; // для случая, когда мало страниц что то придумать надо
+        // подводим итоги
+        if (isset($arr[$page]['dop_limit'])) {
+            $this->dopLimit = $arr[$page]['dop_limit'];
         }
-        if(isset($arr[$page]['offset'])) {
-            $this->globalOffset=$arr[$page]['offset'];
-            // $this->globalLimit=$re['items']; // для случая, когда мало страниц что то придумать надо
+        if (isset($arr[$page]['dop_offset'])) {
+            $this->dopOffset = $arr[$page]['dop_offset'];
         }
-       // $this->globalOffset=1;
 
-                //echo $data['pages'];
-        echo 'всего записей - '. $totalCount.'<br />';
-               // echo 'всего страниц - '. $pageCount.'<br />';
-            // echo 'offset - '. $offset.'<br />';
-              //  echo 'остаток - '. $re['limit'].'<br />';
-        echo 'текущая страница - '. $page.'<br />';
-        echo 'limit - '. $this->GetLimit().'<br />';
-              //  var_dump($cur_page);
-               // echo $pageSize;
-               // echo $pageCount;
-               // echo $totalCount;
-            }
+        echo 'всего записей - ' . $this->totalCount . '<br />';
+        echo 'всего страниц - ' . $this->getPageCount() . '<br />'; // total pages
+        echo 'на незаполненной странице ' . $re['items'] . '<br />';
+        echo 'на сколько распределено ' . $re['pages'] . '<br />';
+        echo 'текущая страница - '. $page .'<br />';
+        echo 'доп. смещение - ' . $this->dopOffset . '<br />';
+        echo 'доп. лимит - ' . $this->dopLimit . '<br />';
+        echo 'limit - ' . $this->GetLimit() . '<br />';
+        echo 'доп. записей на 1 стр. ' . $re['on_page'] . '<br />';
+    }
 
 
     /**
@@ -168,38 +146,25 @@ var_dump($re);
         if ($pageSize < 1) {
             return $this->totalCount > 0 ? 1 : 0;
         } else {
-            $totalCount = $this->totalCount < 0 ? 0 : (int) $this->totalCount;
-
-            return (int) (($totalCount + $pageSize - 1) / $pageSize - $this->hidePage);
+            $totalCount = $this->totalCount < 0 ? 0 : (int)$this->totalCount;
+            return (int)(($totalCount + $pageSize - 1) / $pageSize - $this->hidePage);
         }
     }
 
-    public function getOffset() {
-
-       //echo $this->getPage(); // текущая страница
-
-       if ($this->getPage() == 0 && !isset($_GET[$this->pageParam])) {
-           $this->setPage($this->getPageCount() - 1);
+    public function getOffset()
+    {
+        if ($this->getPage() == 0 && !isset($_GET[$this->pageParam])) {
+            $this->setPage($this->getPageCount() - 1);
         }
 
         if ($this->getPage() == 0
             && isset($_GET[$this->pageParam])
-            && ($_GET[$this->pageParam] < 1 || $_GET[$this->pageParam] > $this->getPageCount())) {
+            && ($_GET[$this->pageParam] < 1 || $_GET[$this->pageParam] > $this->getPageCount())
+        ) {
             $this->setPage($this->getPage() - 1);
         }
 
-       // echo (($this->getPageCount() - $this->getPage() - 1) * $this->getPageSize()) + $this->globalOffset;
-        return (($this->getPageCount() - $this->getPage() - 1) * $this->getPageSize()) + $this->globalOffset;
-
-       // $pageSize = $this->getPageSize();
-       // return $pageSize < 1 ? 0 : $this->getPage() * $pageSize;
-       // найти остаток и распределение - этот остаток и будет смещением для всех
-       // 8 статей
-       // 3 страницы
-       // по три на каждой
-       // offset = 5 = 8 - 3 * 1(page) количество на странице)
-       // offset = 2 = 8 - 3 * 2(page) количество на странице)
-       //
+        return (($this->getPageCount() - $this->getPage() - 1) * $this->getPageSize()) + $this->dopOffset;
     }
 
     /**
@@ -209,11 +174,8 @@ var_dump($re);
      */
     public function getLimit()
     {
-        $pageSize = $this->getPageSize() + $this->globalLimit;
-        //echo $pageSize;
-
+        $pageSize = $this->getPageSize() + $this->dopLimit;
         return $pageSize < 1 ? -1 : $pageSize;
-       // return 9;
     }
 
 

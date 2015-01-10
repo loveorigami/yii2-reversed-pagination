@@ -1,6 +1,17 @@
-Yii2-reversed-pagination (dev mode)
+Yii2-reversed-pagination
 ========================
-!!! Do not use in your projects !!!
+
+## Installation
+
+### Composer
+
+The preferred way to install this extension is through [Composer](http://getcomposer.org/).
+
+Either run ```php composer.phar require loveorigami/yii2-reversed-pagination "~2.0"```
+
+or add ```"loveorigami/yii2-reversed-pagination": "~2.0"``` to the require section of your ```composer.json```
+
+### Using
 
 Use for reversed pagination for Yii2.
 

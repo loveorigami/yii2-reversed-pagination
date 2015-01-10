@@ -1,7 +1,7 @@
 {
     "name": "loveorigami/yii2-reversed-pagination",
     "description": "Yii2 reversed pagination",
-    "version": "1.0.0",
+    "version": "2.1",
     "type": "yii2-extension",
     "keywords": [
         "yii",
