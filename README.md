@@ -43,6 +43,10 @@ In controller
 
 In view
 ```php
+    foreach($models as $model): 
+      // display a model...
+    endforeach; 
+
     echo \loveorigami\pagination\ReverseLinkPager::widget([
         'pagination' => $pages,
         'registerLinkTags' => true
