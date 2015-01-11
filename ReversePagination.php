@@ -1,9 +1,9 @@
 <?php
 /**
  * User: loveorigami
- * Date: 07.11.2014
- * Time: 10:17
- * Version 2.1
+ * Date: 11.01.2015
+ * Time: 10:48
+ * Version 2.2
  */
 
 namespace loveorigami\pagination;
@@ -89,6 +89,11 @@ class ReversePagination extends \yii\data\Pagination
         $startArr = $pageCount - $this->hidePage - 1; // уточняем для расчетов в массиве
         if ($this->getPage() == 0 && !isset($_GET[$this->pageParam])) {
             $page = $startArr;
+        }
+
+        // нужен ли пересчет на текущей странице
+        if($pageCount-$page-$this->hidePage > $this->rePageCount){
+            return;
         }
 
         $arr = []; // данные для итогового смещения
